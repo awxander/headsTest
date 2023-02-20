@@ -1,5 +1,8 @@
 package entities
 
-class Monster {
-    
-}
+class Monster(
+    attack : Int,
+    defence : Int,
+    damageRange : IntRange,
+    maxHealth : Int,
+) : Creature(attack, defence, damageRange, maxHealth)

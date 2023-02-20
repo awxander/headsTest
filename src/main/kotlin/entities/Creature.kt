@@ -1,13 +1,14 @@
 package entities
 
 open class Creature(
-    val attack: Int,
-    val defence: Int,
-    val damageRange: IntRange,
+    private val attack: Int,
+    private val defence: Int,
+    private val damageRange: IntRange,
     val maxHealth: Int
 ) {
 
-    var health: Int = maxHealth
+    protected var health = maxHealth
+    private var alive = true
 
     companion object {
         const val HIGH_BORDER_ATTACK = 20
@@ -18,8 +19,12 @@ open class Creature(
 
     }
 
+    fun alive() = alive
+
+    fun health() = health
+
     init {
-        if (!checkParameters(attack, defence))
+        if (!checkParameters(attack, defence, health))
             throw IllegalArgumentException("defence and attack must be in range 1-20, health must be > 0")
     }
 
@@ -38,32 +43,52 @@ open class Creature(
         1
     }
 
-    fun hit(targetCreature: Creature) {
+    open fun hit(targetCreature: Creature) {
+
+        if (!targetCreature.alive) {
+            println("creature already dead")
+            return
+        }
+
         val attackModifier = getAttackModifier(targetCreature.defence)
 
-        var successAttack = false
+        val successAttack = checkSuccessAttack(attackModifier)
 
-        for (i in 0 until attackModifier) {
-            val res = Dice.`throw`()
-            println("rolled $res")
-            if (res == 5 || res == 6) {
-                successAttack = true
-                break
-            }
-        }
         if (successAttack)
             println("success attack")
         else {
             println("attack failed, not this time")
             return
         }
+        val damage = this.damageRange.random()
+        println("$damage damage dealt")
+        targetCreature.health -= damage
+        if (targetCreature.health <= 0) targetCreature.kill()
+    }
 
-        targetCreature.health -= this.damageRange.random()
+
+    private fun checkSuccessAttack(attackModifier: Int): Boolean {
+        for (i in 0 until attackModifier) {
+            val res = Dice.`throw`()
+            println("rolled $res")
+            if (res == 5 || res == 6) {
+                return true
+            }
+        }
+        return false
 
     }
 
-    private fun dead() {
-        println("dead")
-        
+
+    private fun kill() {
+        alive = false
+    }
+
+    override fun toString(): String {
+        return "attack = $attack\n" +
+                "defence = $defence\n" +
+                "damage range = $damageRange\n" +
+                "health = $health\n" +
+                "alive = $alive\n"
     }
 }

@@ -17,4 +17,8 @@ class Player(
         health += maxHealth/2
         healingLeft--
     }
+
+    override fun toString(): String {
+        return super.toString() + "healing left = $healingLeft\n"
+    }
 }
